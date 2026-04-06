@@ -68,6 +68,16 @@ npm run security:all
 - **`dependency-review.yml`**: PRで新規追加された依存関係の脆弱性チェック
 - **`dependabot.yml`**: 週次で依存関係の自動更新PR作成
 
+全Actionはタグ（`@v4`）ではなく**コミットハッシュで固定（SHAピンニング）**しています。タグは上書き可能なため、侵害されたActionが正規タグを通じて配信されるリスクを防止します（LiteLLM事件の教訓）。
+
+```yaml
+# Bad: タグは上書き可能
+- uses: actions/checkout@v4
+
+# Good: コミットハッシュで固定
+- uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+```
+
 ### Git Hooks (husky)
 
 - **pre-commit**: lockfile-lint + installスクリプト監査
