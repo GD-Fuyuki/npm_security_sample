@@ -455,6 +455,30 @@ npm rebuild esbuild
 
 `npm audit` の結果から許容するアドバイザリーがある場合、`overrides` で一時的にバージョンを固定するか、`npm audit fix` で対応してください。
 
+## 既知の脆弱性について
+
+以下の推移的依存に修正版が未リリースの脆弱性があります（2026年4月時点）:
+
+| パッケージ | 影響範囲 | 深刻度 | 原因 |
+|---|---|---|---|
+| `path-to-regexp` 8.0.0-8.3.0 | ReDoS | High | `express` → `router` の依存 |
+| `picomatch` <=4.0.3 | ReDoS / Method Injection | High | `lockfile-lint` → `fast-glob` → `micromatch` の依存 |
+
+いずれも上流パッケージの修正リリースを待つ必要があります。修正版がリリースされた際は:
+
+1. `overrides` で推移的依存のバージョンを更新する
+2. `audit-level` を `moderate` に戻す
+
+```json
+// package.json - 修正版リリース後の対応例
+{
+  "overrides": {
+    "path-to-regexp": ">=8.4.0",
+    "picomatch": ">=4.1.0"
+  }
+}
+```
+
 ## CI/CDパイプラインの概要
 
 ```
