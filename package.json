@@ -1,0 +1,30 @@
+{
+  "name": "npm-security-sample",
+  "version": "1.0.0",
+  "description": "npm サプライチェーン攻撃対策のテンプレートリポジトリ",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=11.10.0"
+  },
+  "scripts": {
+    "start": "node src/index.mjs",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:audit-signatures": "npm audit signatures",
+    "security:lockfile-lint": "lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https --validate-integrity --validate-package-names",
+    "security:check-scripts": "node scripts/audit-install-scripts.mjs",
+    "security:check-typosquat": "node scripts/check-typosquat.mjs",
+    "security:verify-lockfile": "node scripts/verify-lockfile.mjs",
+    "security:all": "npm run security:audit && npm run security:lockfile-lint && npm run security:check-scripts && npm run security:verify-lockfile",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "express": "4.21.2"
+  },
+  "devDependencies": {
+    "husky": "9.1.7",
+    "lockfile-lint": "4.14.0"
+  },
+  "overrides": {},
+  "license": "MIT"
+}

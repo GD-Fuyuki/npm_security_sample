@@ -1,0 +1,61 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 毎日 06:00 UTC に実行し、新規公開された脆弱性を検出
+    - cron: "0 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      # .npmrc の ignore-scripts=true を尊重してインストール
+      - name: Install dependencies
+        run: npm ci
+
+      # 1. 既知の脆弱性チェック
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+
+      # 2. レジストリ署名の検証 (provenance attestation)
+      - name: npm audit signatures
+        run: npm audit signatures
+
+      # 3. Lockfile検証
+      - name: lockfile-lint
+        run: npx lockfile-lint --path package-lock.json --type npm --allowed-hosts npm --validate-https --validate-integrity --validate-package-names
+
+      # 4. Lockfile整合性チェック
+      - name: Verify lockfile integrity
+        run: node scripts/verify-lockfile.mjs
+
+      # 5. Installスクリプト監査
+      - name: Audit install scripts
+        run: node scripts/audit-install-scripts.mjs
+
+      # 6. Typosquatting検出
+      - name: Check typosquatting
+        run: node scripts/check-typosquat.mjs
+
+      # 7. SBOM生成
+      - name: Generate SBOM (CycloneDX)
+        run: npm sbom --sbom-format cyclonedx > sbom.cdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.cdx.json

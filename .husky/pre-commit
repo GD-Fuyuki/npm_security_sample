@@ -1,0 +1,2 @@
+npm run security:lockfile-lint
+npm run security:check-scripts

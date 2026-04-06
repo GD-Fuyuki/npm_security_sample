@@ -1,0 +1,25 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # PR内の依存関係変更を基準ブランチと比較し、
+      # 新たに追加された脆弱な依存関係をフラグする
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          # OpenSSF Scorecardスコアが低いパッケージを警告
+          warn-on-openssf-scorecard-level: 3
+          # 特定ライセンスを拒否する場合はコメントを解除:
+          # deny-licenses: GPL-3.0, AGPL-3.0
